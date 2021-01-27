@@ -1,3 +1,8 @@
+.map {
+    text-align: center;
+    width: 100%;
+}
+
 .map > img {
     width: 1400px;
 }
