@@ -45,45 +45,85 @@ function getLogs() {
 
 function filterOneLog(text) {
 
+    var regPosition = /<(.*?)>/
+    var regDelete = / *\([^)]*\)*/g
+    var regUser = /"(.*?)"/g
+
     var results = {
         "type": false,
         "text": text.replace(/ *\([^)]*\)*/g, '')
     }
 
     var actions = {
-        "death": {
+        "flags": {
+            "filter": ["ControlPoint"],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "flag.png"
+        },
+        "deaths": {
             "filter": ["killed", "died"],
-            "regDelete": / *\([^)]*\)*/g,
-            "regPosition": /<(.*?)>/,
-            "regUser": /"(.*?)"/g,
-            "icon": "death"
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "death.png"
+        },
+        "damages": {
+            "filter": ["hit by"],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "damage.png"
+        },
+        "constructions": {
+            "filter": ["placed"],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "construction.png"
+        },
+        "connections": {
+            "filter": ["connected"],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "connected.png"
+        },
+        "rest": {
+            "filter": [" "],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "other.png"
         }
     }
 
     for (var key in actions) {
-        
         for (var filter in actions[key].filter) {
             if(text.indexOf(actions[key].filter[filter]) > -1) {
                 
-                let tagTitle = text.match(actions[key].regUser)[0]
-                if(typeof text.match(actions[key].regUser)[1] !== 'undefined')
-                    tagTitle = text.match(actions[key].regUser)[1] + '-->' + text.match(actions[key].regUser)[0]
+                let tagTitle = ""
+                if(text.match(actions[key].regUser) !== null) {
+                    tagTitle = text.match(actions[key].regUser)[0]
+                    if(typeof text.match(actions[key].regUser)[1] !== 'undefined')
+                        tagTitle = text.match(actions[key].regUser)[1] + '-->' + text.match(actions[key].regUser)[0]
+
+                    tagTitle = tagTitle.replace(/"/g, "")
+                }
 
                 results = {
                     "type": key,
                     "text": text.replace(actions[key].regDelete, ''),
-                    "tagTitle": tagTitle.replace(/"/g, ""), 
+                    "tagTitle": tagTitle, 
                     "icon": actions[key].icon
                 }
 
-                if(typeof actions[key].regPosition !== 'undefined')
-                    results['position'] = text.match(actions[key].regPosition)[1].split(',', 2)
+                if(text.indexOf('pos=<') > -1)
+                    results['position'] = text.match(regPosition)[1].split(',', 2)
                 
                 break;
             }
         }
-    }
 
+        if(results.type !== false)
+            break;
+    }
+    
     return results
 }
 
@@ -95,7 +135,7 @@ function filterLogs(filters = []) {
         logs[key].forEach(value => {
             let filteredLog = filterOneLog(value)
             
-            if(filters.length == 0 || filters.includes(filteredLog.type)) {
+            if(filters.includes(filteredLog.type) || filters.includes('rest')) {
                 results[key] = filteredLog
             }
         })
@@ -136,7 +176,7 @@ function addTag(position, icon, title) {
     var x = calculatePosition('x', position[0])
     var y = calculatePosition('y', position[1])
 
-    var tag = '<span class="tag icon_'+ icon +'" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;"></span>'
+    var tag = '<span class="tag" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px; background-image: url(\'img/'+ icon +'\');"></span>'
 
     document.getElementById('map').innerHTML += tag
 
@@ -170,13 +210,22 @@ function updateConsole() {
 
 // getLogs()
 
-document.querySelector('.show').addEventListener('change', (event) => {
-
-    updateConsole()
+// document.querySelector('.show').addEventListener('change', (event) => {
+    
+//     updateConsole()
 
     // const result = document.getElementById('results');
     // if(event.target.checked)
     //     result.textContent = `You like ${event.target.value}`;
     // else
     //     result.textContent = `You don't like ${event.target.value}`;
+// });
+
+
+const inputs = document.querySelectorAll(".show");
+
+inputs.forEach(function(item) {
+    item.addEventListener('change', (event) => {
+        updateConsole()
+    });
 });
