@@ -116,6 +116,15 @@ function getFilters() {
     return filters
 }
 
+function calculatePosition(axis, position, mapWidth=1400, mapHeight=856) {
+
+    if(axis == 'x')
+        return (parseInt(position) - 9783) * (mapWidth / 5573) - 20
+    else
+        return Math.abs(mapHeight - (parseInt(position) - 11973) * (mapHeight / 3382)) - 40
+
+}
+
 function clearTags() {
     var elements = document.getElementsByClassName("tag");
     while(elements.length > 0){
@@ -124,16 +133,8 @@ function clearTags() {
 }
 
 function addTag(position, icon, title) {
-    // var x_mod = 0.27
-    // var y_mod = -13770
-    // var x_mod = document.getElementById('x').value
-    // var y_mod = document.getElementById('y').value
-
-    // var x = parseInt(position[0]) * parseFloat(0.27) + parseFloat(-2700)
-    // var y = parseInt(position[1]) * parseFloat(x_mod) + parseFloat(y_mod)
-
-    var x = (parseInt(position[0]) - 9783) * (1400 / 5573) - 20
-    var y = Math.abs(856 - (parseInt(position[1]) - 11973) * (856 / 3382)) - 40
+    var x = calculatePosition('x', position[0])
+    var y = calculatePosition('y', position[1])
 
     var tag = '<span class="tag icon_'+ icon +'" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;"></span>'
 
