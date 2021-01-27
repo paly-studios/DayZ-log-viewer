@@ -43,36 +43,45 @@ function getLogs() {
     return logs
 }
 
-function filterText(text) {
+function filterOneLog(text) {
 
     var results = {
         "type": false,
         "text": text.replace(/ *\([^)]*\)*/g, '')
     }
+
     var actions = {
-        "deaths": {
-            "filter": "killed",
+        "death": {
+            "filter": ["killed", "died"],
             "regDelete": / *\([^)]*\)*/g,
-            "regPosition": /<(.*?)>/
+            "regPosition": /<(.*?)>/,
+            "regUser": /"(.*?)"/g,
+            "icon": "death"
         }
     }
 
     for (var key in actions) {
-    
-        // text.filter(function (str) { return value.test(str); })
         
-        if(text.indexOf(actions[key].filter) > -1) {
-            results = {
-                "type": key,
-                "text": text.replace(actions[key].regDelete, '')
-            }
+        for (var filter in actions[key].filter) {
+            if(text.indexOf(actions[key].filter[filter]) > -1) {
+                
+                let tagTitle = text.match(actions[key].regUser)[0]
+                if(typeof text.match(actions[key].regUser)[1] !== 'undefined')
+                    tagTitle = text.match(actions[key].regUser)[1] + '-->' + text.match(actions[key].regUser)[0]
 
-            if(typeof actions[key].regPosition !== 'undefined')
-                results['position'] = text.match(actions[key].regPosition)[1]
-            
-            break;
+                results = {
+                    "type": key,
+                    "text": text.replace(actions[key].regDelete, ''),
+                    "tagTitle": tagTitle.replace(/"/g, ""), 
+                    "icon": actions[key].icon
+                }
+
+                if(typeof actions[key].regPosition !== 'undefined')
+                    results['position'] = text.match(actions[key].regPosition)[1].split(',', 2)
+                
+                break;
+            }
         }
-        
     }
 
     return results
@@ -84,11 +93,10 @@ function filterLogs(filters = []) {
     
     for (var key in logs) {
         logs[key].forEach(value => {
-            let filteredText = filterText(value)
+            let filteredLog = filterOneLog(value)
             
-            if(filters.length == 0 || filters.includes(filteredText.type)) {
-                results[key] = filteredText.text
-                console.log(filteredText.position)
+            if(filters.length == 0 || filters.includes(filteredLog.type)) {
+                results[key] = filteredLog
             }
         })
     }
@@ -108,24 +116,52 @@ function getFilters() {
     return filters
 }
 
+function clearTags() {
+    var elements = document.getElementsByClassName("tag");
+    while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+}
+
+function addTag(position, icon, title) {
+    // var x_mod = 0.27
+    // var y_mod = -13770
+    // var x_mod = document.getElementById('x').value
+    // var y_mod = document.getElementById('y').value
+
+    // var x = parseInt(position[0]) * parseFloat(0.27) + parseFloat(-2700)
+    // var y = parseInt(position[1]) * parseFloat(x_mod) + parseFloat(y_mod)
+
+    var x = (parseInt(position[0]) - 9783) * (1400 / 5573) - 20
+    var y = Math.abs(856 - (parseInt(position[1]) - 11973) * (856 / 3382)) - 40
+
+    var tag = '<span class="tag icon_'+ icon +'" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;"></span>'
+
+    document.getElementById('map').innerHTML += tag
+
+}
 
 function updateConsole() {
     var logs = filterLogs(getFilters())
     var html = "" 
     var actualDate = false
 
+    clearTags()
+
     for (var key in logs) {
-        console.log(logs[key])
 
         if(actualDate != key) {
             actualDate = key
             html += "<br /><b>" + actualDate + "</b><br />"
         }
         
-        html += logs[key] + "<br />"
+        html += logs[key].text + "<br />"
+
+        if(typeof logs[key].position !== 'undefined')
+            addTag(logs[key].position, logs[key].icon, key + ': ' + logs[key].tagTitle)
     }
     
-    document.getElementById('placeholder').innerHTML = html
+    document.getElementById('results').innerHTML = html
 }
 
 
@@ -137,7 +173,7 @@ document.querySelector('.show').addEventListener('change', (event) => {
 
     updateConsole()
 
-    // const result = document.getElementById('placeholder');
+    // const result = document.getElementById('results');
     // if(event.target.checked)
     //     result.textContent = `You like ${event.target.value}`;
     // else

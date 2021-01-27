@@ -1,8 +1,36 @@
-.map {
-    text-align: center;
-    width: 100%;
+#console {
+    display: inline-block;
+    vertical-align: top;
+    width: 20%;
 }
 
-.map > img {
+#map_container {
+    display: inline-block;
+    text-align: center;
+    width: 79%;
+    height: 100%;
+}
+
+#map {
+    position: relative;
     width: 1400px;
+    height: 856px;
+    /* width: 100%;
+    height: 100%; */
+    background-image: url("games/game1.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: auto;
+}
+
+.tag {
+    position: absolute;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+}
+
+.icon_death {
+    background-image: url("img/death.png");
 }
