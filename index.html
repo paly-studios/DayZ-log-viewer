@@ -11,7 +11,7 @@
 <body class="container">
     
     <div id="console">
-        <form>
+        <form onSubmit="return false;">
             <h2>Co pokazać?</h2>
             
             <br />
@@ -24,7 +24,11 @@
             
             <br />
             <input type="checkbox" id="damages" class="show" name="show[]" value="damages">
-            <label for="damages">Obrażenia</label>
+            <label for="damages">Obrażenia gracze</label>
+
+            <br />
+            <input type="checkbox" id="zombies" class="show" name="show[]" value="zombies">
+            <label for="zombies">Obrażenia inne</label>
             
             <br />
             <input type="checkbox" id="constructions" class="show" name="show[]" value="constructions">
@@ -37,6 +41,11 @@
             <br />
             <input type="checkbox" id="rest" class="show" name="show[]" value="rest">
             <label for="rest">Inne</label>
+            
+            <br />
+            <label for="custom">Własny filtr textowy (dzielone przez ";"): </label>
+            <input type="text" id="custom" class="custom" name="custom" placeholder="np. Jez">
+            <button onClick="updateConsole();">Filtruj</button>
         </form>
     
         <div id="results"></div>

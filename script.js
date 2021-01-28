@@ -46,17 +46,24 @@ function getLogs() {
 function filterOneLog(text) {
 
     var regPosition = /<(.*?)>/
-    var regDelete = / *\([^)]*\)*/g
+    var regDelete = /\(id(.+?)\)/g
+    // var regDelete = / *\([^)]*\)*/g
     var regUser = /"(.*?)"/g
 
     var results = {
         "type": false,
-        "text": text.replace(/ *\([^)]*\)*/g, '')
+        "text": text.replace(/\(id(.+?)\)/g, '').replace('(DEAD)', '')
     }
 
     var actions = {
+        "custom": {
+            "filter": getCustomFilter(),
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "other.png"
+        }, 
         "flags": {
-            "filter": ["ControlPoint"],
+            "filter": ["conquered", "longer controller"],
             "regDelete": regDelete,
             "regUser": regUser,
             "icon": "flag.png"
@@ -68,7 +75,13 @@ function filterOneLog(text) {
             "icon": "death.png"
         },
         "damages": {
-            "filter": ["hit by"],
+            "filter": ["hit by Player"],
+            "regDelete": regDelete,
+            "regUser": regUser,
+            "icon": "hit.png"
+        },
+        "zombies": {
+            "filter": ["hit by", "consciousness", "unconscious"],
             "regDelete": regDelete,
             "regUser": regUser,
             "icon": "damage.png"
@@ -92,10 +105,10 @@ function filterOneLog(text) {
             "icon": "other.png"
         }
     }
-
+    
     for (var key in actions) {
         for (var filter in actions[key].filter) {
-            if(text.indexOf(actions[key].filter[filter]) > -1) {
+            if(actions[key].filter[filter] !== '' && text.indexOf(actions[key].filter[filter]) > -1) {
                 
                 let tagTitle = ""
                 if(text.match(actions[key].regUser) !== null) {
@@ -108,7 +121,7 @@ function filterOneLog(text) {
 
                 results = {
                     "type": key,
-                    "text": text.replace(actions[key].regDelete, ''),
+                    "text": text.replace(actions[key].regDelete, '').replace('(DEAD)', ''),
                     "tagTitle": tagTitle, 
                     "icon": actions[key].icon
                 }
@@ -130,13 +143,17 @@ function filterOneLog(text) {
 function filterLogs(filters = []) {
     var logs = getLogs()
     var results = {}
-    
+    console.log(filters)
     for (var key in logs) {
         logs[key].forEach(value => {
             let filteredLog = filterOneLog(value)
+            console.log(filteredLog)
             
             if(filters.includes(filteredLog.type) || filters.includes('rest')) {
-                results[key] = filteredLog
+                if(typeof results[key] == 'undefined')
+                    results[key] = []
+
+                results[key].push(filteredLog)
             }
         })
     }
@@ -152,8 +169,15 @@ function getFilters() {
         if(inputs.item(i).checked)
             filters.push(inputs.item(i).value)
     }
+
+    if(document.getElementById("custom").value !== '')
+        filters.push('custom')
     
     return filters
+}
+
+function getCustomFilter() {
+    return document.getElementById("custom").value.split(';')
 }
 
 function calculatePosition(axis, position, mapWidth=1400, mapHeight=856) {
@@ -196,10 +220,12 @@ function updateConsole() {
             html += "<br /><b>" + actualDate + "</b><br />"
         }
         
-        html += logs[key].text + "<br />"
+        for (var key2 in logs[key]) {
+            html += "- " + logs[key][key2].text + "<br /><br />"
 
-        if(typeof logs[key].position !== 'undefined')
-            addTag(logs[key].position, logs[key].icon, key + ': ' + logs[key].tagTitle)
+            if(typeof logs[key][key2].position !== 'undefined')
+                addTag(logs[key][key2].position, logs[key][key2].icon, key + ': ' + logs[key][key2].tagTitle)
+        }
     }
     
     document.getElementById('results').innerHTML = html
