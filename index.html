@@ -11,7 +11,7 @@
 <body class="container">
     
     <div id="console">
-        <form onSubmit="return false;">
+        <form onSubmit="updateConsole(); return false;">
             <h2>Co pokazać?</h2>
             
             <br />
@@ -42,8 +42,12 @@
             <input type="checkbox" id="rest" class="show" name="show[]" value="rest">
             <label for="rest">Inne</label>
             
+            <br /><br />
+            <label for="custom">Własny filtr textowy (separator: ";"): </label>
             <br />
-            <label for="custom">Własny filtr textowy (dzielone przez ";"): </label>
+            <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
+            <label for="customAnd">Or/And</label>
+            <br />
             <input type="text" id="custom" class="custom" name="custom" placeholder="np. Jez">
             <button onClick="updateConsole();">Filtruj</button>
         </form>

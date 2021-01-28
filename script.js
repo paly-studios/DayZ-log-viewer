@@ -56,12 +56,6 @@ function filterOneLog(text) {
     }
 
     var actions = {
-        "custom": {
-            "filter": getCustomFilter(),
-            "regDelete": regDelete,
-            "regUser": regUser,
-            "icon": "other.png"
-        }, 
         "flags": {
             "filter": ["conquered", "longer controller"],
             "regDelete": regDelete,
@@ -99,7 +93,7 @@ function filterOneLog(text) {
             "icon": "connected.png"
         },
         "rest": {
-            "filter": [" "],
+            "filter": [""],
             "regDelete": regDelete,
             "regUser": regUser,
             "icon": "other.png"
@@ -109,7 +103,7 @@ function filterOneLog(text) {
     for (var key in actions) {
         for (var filter in actions[key].filter) {
             if(actions[key].filter[filter] !== '' && text.indexOf(actions[key].filter[filter]) > -1) {
-                
+
                 let tagTitle = ""
                 if(text.match(actions[key].regUser) !== null) {
                     tagTitle = text.match(actions[key].regUser)[0]
@@ -143,13 +137,12 @@ function filterOneLog(text) {
 function filterLogs(filters = []) {
     var logs = getLogs()
     var results = {}
-    console.log(filters)
+    
     for (var key in logs) {
         logs[key].forEach(value => {
             let filteredLog = filterOneLog(value)
-            console.log(filteredLog)
             
-            if(filters.includes(filteredLog.type) || filters.includes('rest')) {
+            if((filters.includes(filteredLog.type) || filters.includes('rest')) && customFilter(filteredLog.text)) {
                 if(typeof results[key] == 'undefined')
                     results[key] = []
 
@@ -169,15 +162,30 @@ function getFilters() {
         if(inputs.item(i).checked)
             filters.push(inputs.item(i).value)
     }
-
-    if(document.getElementById("custom").value !== '')
-        filters.push('custom')
     
     return filters
 }
 
-function getCustomFilter() {
-    return document.getElementById("custom").value.split(';')
+function customFilter(text) {
+    var test = 0
+    var filterValue = document.getElementById("custom").value.trim()
+    var filter = filterValue.split(';')
+    
+    if(filterValue != '') {
+        for(var key2 in filter) {
+            if(text.indexOf(filter[key2].trim()) > -1) {
+                test += 1
+            }
+        }
+    }
+    else 
+        test = 1
+    
+    let customAnd = document.getElementById("customAnd").checked
+    if((test > 0 && !customAnd) || (test == filter.length && customAnd))
+        return true
+    else
+        return false
 }
 
 function calculatePosition(axis, position, mapWidth=1400, mapHeight=856) {
