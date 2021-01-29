@@ -1,14 +1,14 @@
 // VARIABLES
 var gameFile = 'games/game1.ADM'
-
+var logFile
 
 // FUNCTIONS
 
-function loadLogs(logFile) {
-
+function loadLogs(file) {
+    
     var xhr = new XMLHttpRequest();
     // xhr.timeout = 4000;
-    xhr.open('GET', logFile, false);
+    xhr.open('GET', file, false);
     xhr.send();
 
     if (xhr.readyState == 4 && xhr.status == 200) {
@@ -21,9 +21,11 @@ function loadLogs(logFile) {
 function getLogs() {
 
     var logs = {}
-    var file = loadLogs(gameFile)
 
-    file.split("\n").forEach((value, index) => {
+    if(typeof logFile == 'undefined')
+        logFile = loadLogs(gameFile)
+
+    logFile.split("\n").forEach((value, index) => {
 
         let oneLine = value.split(" | ")
         
