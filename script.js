@@ -3,6 +3,7 @@ var logFile
 var gameFile = 'games/game1.ADM'
 var gamePlayers
 var gameFlags = {}
+var gameStart
 
 
 // FUNCTIONS
@@ -36,6 +37,8 @@ function getLogs() {
             let group = oneLine[0]
             // delete oneLine[0]
             oneLine.splice(0, 1)
+
+            gameStart = parseInt(group.replace(/:/g, ''))
 
             if(typeof logs[group] == 'undefined')
                 logs[group] = []
@@ -152,6 +155,7 @@ function filterLogs(filters = []) {
                 (filters.includes(filteredLog.type) || filters.includes('rest')) 
                 && textFilter(filteredLog.text) 
                 && playerFilter(filteredLog.text)
+                && timeFilter(key)
             ) {
                 if(typeof results[key] == 'undefined')
                     results[key] = []
@@ -212,6 +216,28 @@ function playerFilter(text) {
     });
 
     return customFilter(text, players, false)
+}
+
+function timeFilter(time) {
+    let test = true
+
+    if(document.getElementById('time').value != '') {
+
+        let timeFilters = parseInt(document.getElementById('time').value.replace(/:/g, ''))
+        time = parseInt(time.replace(/:/g, ''))
+        
+        if(timeFilters < gameStart)
+            timeFilters += 1000000
+        if(time < gameStart)
+            time += 1000000
+        
+        if(timeFilters != '' && timeFilters < time)
+            test = false
+        else 
+            test = true
+    }
+
+    return test
 }
 
 function calculatePosition(axis, position, mapWidth=1400, mapHeight=856) {
@@ -446,9 +472,11 @@ function drawFlags() {
 
         if(gameFlags[key].visited.length > 0) {
             for(var key2 in gameFlags[key].visited) {
+                // Vertical
                 gameFlags[key].position[2] = 0
                 gameFlags[key].position[3] = key2 * 15 * -1
                 
+                // Horizontal
                 // gameFlags[key].position[2] = key2 * 15 * -1 - 10
                 // gameFlags[key].position[3] = -42
 
@@ -473,20 +501,6 @@ function showHide(id) {
 
 
 // ACTIONS
-
-// getLogs()
-
-// document.querySelector('.show').addEventListener('change', (event) => {
-    
-//     updateConsole()
-
-    // const result = document.getElementById('results');
-    // if(event.target.checked)
-    //     result.textContent = `You like ${event.target.value}`;
-    // else
-    //     result.textContent = `You don't like ${event.target.value}`;
-// });
-
 
 bindChanges('.show')
 

@@ -13,10 +13,9 @@
     <div id="hideConsole" onClick="showHide('console')"><---</div>
 
     <div id="console">
-        <form onSubmit="updateConsole(); return false;">
+        <form onSubmit="return false;">
             <h2>Co pokazać?</h2>
             
-            <br />
             <input type="checkbox" id="flags" class="show" name="show[]" value="flags">
             <label for="flags">Flagi</label>
 
@@ -51,11 +50,20 @@
             <br />
             <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
             <label for="customAnd">Or/And</label>
-            <br />
             <input type="text" id="custom" class="custom" name="custom" placeholder="np. Head; prezent">
+        
+            <br />
+            <label for="time">Znacznik czasowy: </label>
+            <br />
+            <input type="text" id="time" class="time" name="time" placeholder="23:32:30">
+            <!-- <br />
+            <input type="text" id="speed" class="time" name="speed" placeholder="Prędkość (np. '1.5')"> -->
+
+            <br />
             <button onClick="updateConsole();">Filtruj</button>
+        
         </form>
-    
+
         <div id="results"></div>
     </div>
 
