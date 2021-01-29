@@ -25,8 +25,19 @@
 
 .tag {
     position: absolute;
+}
+
+.tag > img {
+    width: 100%;
+}
+
+.event {
     background-repeat: no-repeat;
+    background-size: contain;
     width: 40px;
     height: 40px;
-    background-size: contain;
+}
+
+.tag.visited {
+    padding: 5px;
 }

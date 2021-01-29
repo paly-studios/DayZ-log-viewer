@@ -1,7 +1,8 @@
 // VARIABLES
-var gameFile = 'games/game1.ADM'
 var logFile
+var gameFile = 'games/game1.ADM'
 var gamePlayers
+var gameFlags = {}
 
 
 // FUNCTIONS
@@ -56,7 +57,8 @@ function filterOneLog(text) {
 
     var results = {
         "type": false,
-        "text": text.replace(/\(id(.+?)\)/g, '').replace('(DEAD)', '')
+        "text": text.replace(/\(id(.+?)\)/g, '').replace('(DEAD)', ''),
+        "icon": "other.png"
     }
 
     var actions = {
@@ -208,7 +210,7 @@ function playerFilter(text) {
         if(item.checked)
             players.push(item.value)
     });
-    console.log(players)
+
     return customFilter(text, players, false)
 }
 
@@ -232,18 +234,40 @@ function addTag(position, icon, title) {
     var x = calculatePosition('x', position[0])
     var y = calculatePosition('y', position[1])
 
-    var tag = '<span class="tag" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px; background-image: url(\'img/'+ icon +'\');"></span>'
+    var tag = '<span class="tag event" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;">';
+
+    if(icon.indexOf('<svg ') > -1)
+        tag += icon
+    else
+        tag += '<img src="img/'+ icon +'" />'
+
+    tag += '</span>'
+
+    document.getElementById('map').innerHTML += tag
+
+}
+
+function addVisited(position, player, title) {
+    var x = calculatePosition('x', position[0]) - 20
+    var y = calculatePosition('y', position[1]) - 40
+
+    for(var i=0; i<player; i++)
+        y += 10
+
+    var tag = '<span class="tag visited" title="'+title+'" style="left: '+x+'px; top: '+y+'px; background-color:'+player.color+';"></span>'
 
     document.getElementById('map').innerHTML += tag
 
 }
 
 function updateConsole() {
-    var logs = filterLogs(getFilters())
+    var filters = getFilters()
+    var logs = filterLogs(filters)
     var html = "" 
     var actualDate = false
 
     clearTags()
+    setFlags()
 
     for (var key in logs) {
 
@@ -257,8 +281,24 @@ function updateConsole() {
 
             if(typeof logs[key][key2].position !== 'undefined')
                 addTag(logs[key][key2].position, logs[key][key2].icon, key + ': ' + logs[key][key2].tagTitle)
+
+            if(logs[key][key2].type == 'flags') {
+                let user = logs[key][key2].text.substr(logs[key][key2].text.indexOf('by ') + 3)
+                let flag = logs[key][key2].text.match(/\((.*?),/)[1]
+
+                if(logs[key][key2].text.indexOf('no longer controller') > - 1) {
+                    gameFlags[flag]['owner'] = ''
+                }
+                else {
+                    gameFlags[flag]['owner'] = user
+                    if(!gameFlags[flag]['visited'].includes(user))
+                        gameFlags[flag]['visited'].push(user)
+                }
+            }
         }
     }
+
+    drawFlags()
     
     document.getElementById('results').innerHTML = html
 }
@@ -284,12 +324,13 @@ function setPlayers() {
     players = [...new Set(logFile.match(regexp))]
 
     for(var key in players) {
-        gamePlayers[key] = {}
-        gamePlayers[key].name = players[key].replace('Player ', '').replace(/"/g, '')
-        if(colorsPlayers[gamePlayers[key].name])
-            gamePlayers[key].color = colorsPlayers[gamePlayers[key].name]
+        let name = players[key].replace('Player ', '').replace(/"/g, '')
+        gamePlayers[name] = {}
+
+        if(colorsPlayers[name])
+            gamePlayers[name].color = colorsPlayers[name]
         else
-            gamePlayers[key].color = '#' + Math.floor(Math.random()*16777215).toString(16)
+            gamePlayers[name].color = '#' + Math.floor(Math.random()*16777215).toString(16)
             // gamePlayers[key].color = colors.pop()
     }
 }
@@ -302,9 +343,9 @@ function showPlayers() {
     for (var key in gamePlayers) {
         document.getElementById('players').innerHTML += '\
 <div class="players color_'+gamePlayers[key].color+'" style="color:'+gamePlayers[key].color+';">\
-    <input type="checkbox" id="player_'+key+'" name="players" class="player" value="'+gamePlayers[key].name+'" checked="checked"\
+    <input type="checkbox" id="player_'+key.replace(/ /g, '_')+'" name="players" class="player" value="'+key+'" checked="checked"\
     style="background-color:'+gamePlayers[key].color+';" />\
-    <label for="player_'+key+'">' + gamePlayers[key].name + '</label>\
+    <label for="player_'+key.replace(/ /g, '_')+'">' + key + '</label>\
 </div>';
     }
 
@@ -319,6 +360,59 @@ function bindChanges(classes) {
             updateConsole()
         });
     });
+}
+
+function setFlags() {
+    let logs = getLogs()
+
+    for(var key in logs) {
+        if(logs[key][0].indexOf('Control point statuses') > -1) {
+            for(var key2 in logs[key]) {
+                let flag = logs[key][key2].match(/\((.*?)\)/)
+                if(flag) {
+                    flag = flag[1].split(',')
+                    gameFlags[flag[0].trim()] = {
+                        "position": [flag[1].trim(), flag[2].trim()],
+                        "owner": "",
+                        "visited": []
+                    }
+                }
+            }
+
+            break
+        }
+    }
+}
+
+function drawFlags() {
+    console.log(gameFlags)
+    const flagPin = '\
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"\
+    width="100%" height="100%" viewBox="0 0 425.963 425.963" style="enable-background:new 0 0 425.963 425.963; %color%"\
+    xml:space="preserve">\
+<g>\
+   <path d="M213.285,0h-0.608C139.114,0,79.268,59.826,79.268,133.361c0,48.202,21.952,111.817,65.246,189.081\
+       c32.098,57.281,64.646,101.152,64.972,101.588c0.906,1.217,2.334,1.934,3.847,1.934c0.043,0,0.087,0,0.13-0.002\
+       c1.561-0.043,3.002-0.842,3.868-2.143c0.321-0.486,32.637-49.287,64.517-108.976c43.03-80.563,64.848-141.624,64.848-181.482\
+       C346.693,59.825,286.846,0,213.285,0z M274.865,136.62c0,34.124-27.761,61.884-61.885,61.884\
+       c-34.123,0-61.884-27.761-61.884-61.884s27.761-61.884,61.884-61.884C247.104,74.736,274.865,102.497,274.865,136.62z"/>\
+</g>\
+</svg>\
+</span>'
+
+    for(var key in gameFlags) {
+        if(gameFlags[key].owner != '') {
+            addTag(
+                gameFlags[key].position, 
+                flagPin.replace('%color%', 'fill:'+gamePlayers[gameFlags[key].owner].color+';'), 
+                'Owned: ' + gameFlags[key].owner
+            )
+        }
+
+        if(gameFlags[key].length > 0) {
+
+        }
+    }
 }
 
 
@@ -341,3 +435,5 @@ function bindChanges(classes) {
 bindChanges('.show')
 
 showPlayers()
+
+setFlags()
