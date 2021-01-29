@@ -286,18 +286,20 @@ function updateConsole() {
                 let flag = logs[key][key2].text.match(/\((.*?),/)[1]
 
                 if(logs[key][key2].text.indexOf('no longer controller') > - 1) {
-                    gameFlags[flag]['owner'] = ''
+                    gameFlags[flag].owner = ''
                 }
                 else {
-                    gameFlags[flag]['owner'] = user
-                    if(!gameFlags[flag]['visited'].includes(user))
-                        gameFlags[flag]['visited'].push(user)
+                    gameFlags[flag].owner = user
+                    if(!gameFlags[flag].visited.includes(user)) {
+                        gameFlags[flag].visited.push(user)
+                    }
                 }
             }
         }
     }
 
     drawFlags()
+    updatePlayers()
     
     document.getElementById('results').innerHTML = html
 }
@@ -340,15 +342,50 @@ function showPlayers() {
         setPlayers()
 
     for (var key in gamePlayers) {
+        let userId = key.replace(/ /g, '_')
+
         document.getElementById('players').innerHTML += '\
 <div class="players color_'+gamePlayers[key].color+'" style="color:'+gamePlayers[key].color+';">\
-    <input type="checkbox" id="player_'+key.replace(/ /g, '_')+'" name="players" class="player" value="'+key+'" checked="checked"\
+    <input type="checkbox" id="player_'+userId+'" name="players" class="player" value="'+key+'" checked="checked"\
     style="background-color:'+gamePlayers[key].color+';" />\
-    <label for="player_'+key.replace(/ /g, '_')+'">' + key + '</label>\
+    <label for="player_'+userId+'">\
+    ' + key + ' (\
+        active: <span id="active_'+userId+'">0</span>,\
+        visited: <span id="visited_'+userId+'">0</span>,\
+        first: <span id="first_'+userId+'">0</span>\
+    )\
+    </label>\
 </div>';
     }
 
     bindChanges('.player')
+}
+
+function updatePlayers() {
+    for (var key in gamePlayers) {
+        gamePlayers[key].active = 0
+        gamePlayers[key].visited = 0
+        gamePlayers[key].first = 0
+    }
+
+    for (var key in gameFlags) {
+        if(gameFlags[key].owner != '')
+            gamePlayers[gameFlags[key].owner].active += 1
+
+        for(var key2 in gameFlags[key].visited) {
+            if(key2 == 0)
+                gamePlayers[gameFlags[key].visited[key2]].first += 1
+
+            gamePlayers[gameFlags[key].visited[key2]].visited += 1
+        }
+    }
+
+    for (var key in gamePlayers) {
+        let userId = key.replace(/ /g, '_')
+        document.getElementById('active_'+userId).innerHTML = gamePlayers[key].active
+        document.getElementById('visited_'+userId).innerHTML = gamePlayers[key].visited
+        document.getElementById('first_'+userId).innerHTML = gamePlayers[key].first
+    }
 }
 
 function bindChanges(classes) {
