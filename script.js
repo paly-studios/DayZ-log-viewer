@@ -1,6 +1,8 @@
 // VARIABLES
 var gameFile = 'games/game1.ADM'
 var logFile
+var gamePlayers
+
 
 // FUNCTIONS
 
@@ -144,7 +146,11 @@ function filterLogs(filters = []) {
         logs[key].forEach(value => {
             let filteredLog = filterOneLog(value)
             
-            if((filters.includes(filteredLog.type) || filters.includes('rest')) && customFilter(filteredLog.text)) {
+            if(
+                (filters.includes(filteredLog.type) || filters.includes('rest')) 
+                && textFilter(filteredLog.text) 
+                && playerFilter(filteredLog.text)
+            ) {
                 if(typeof results[key] == 'undefined')
                     results[key] = []
 
@@ -168,14 +174,14 @@ function getFilters() {
     return filters
 }
 
-function customFilter(text) {
+function customFilter(text, search, type) {
     var test = 0
     var filterValue = document.getElementById("custom").value.trim()
     var filter = filterValue.split(';')
     
-    if(filterValue != '') {
-        for(var key2 in filter) {
-            if(text.indexOf(filter[key2].trim()) > -1) {
+    if(search.length > 0 && search[0] != '') {
+        for(var key2 in search) {
+            if(text.indexOf(search[key2].trim()) > -1) {
                 test += 1
             }
         }
@@ -183,11 +189,27 @@ function customFilter(text) {
     else 
         test = 1
     
-    let customAnd = document.getElementById("customAnd").checked
-    if((test > 0 && !customAnd) || (test == filter.length && customAnd))
+    if((test > 0 && !type) || (test == search.length && type))
         return true
     else
         return false
+}
+
+function textFilter(text) {
+    return customFilter(text, document.getElementById("custom").value.trim().split(';'), document.getElementById("customAnd").checked)
+}
+
+function playerFilter(text) {
+
+    let playerFilters = document.querySelectorAll(".player")
+    let players = []
+    
+    playerFilters.forEach(function(item) {
+        if(item.checked)
+            players.push(item.value)
+    });
+    console.log(players)
+    return customFilter(text, players, false)
 }
 
 function calculatePosition(axis, position, mapWidth=1400, mapHeight=856) {
@@ -241,6 +263,64 @@ function updateConsole() {
     document.getElementById('results').innerHTML = html
 }
 
+function setPlayers() {
+
+    gamePlayers = {}
+    let players
+    let regexp = /Player "(.*?)"/g
+    let colorsPlayers = {
+        "MC":"blue",
+        "Mardok":"green",
+        "Stefan":"red",
+        "Jez":"pink",
+        "NieWaskiDzik":"fuchsia",
+        "Superkomunista":"lime"
+    }
+    let colors = ['gray', 'black']
+
+    if(typeof logFile == 'undefined')
+        logFile = loadLogs(gameFile)
+
+    players = [...new Set(logFile.match(regexp))]
+
+    for(var key in players) {
+        gamePlayers[key] = {}
+        gamePlayers[key].name = players[key].replace('Player ', '').replace(/"/g, '')
+        if(colorsPlayers[gamePlayers[key].name])
+            gamePlayers[key].color = colorsPlayers[gamePlayers[key].name]
+        else
+            gamePlayers[key].color = '#' + Math.floor(Math.random()*16777215).toString(16)
+            // gamePlayers[key].color = colors.pop()
+    }
+}
+
+function showPlayers() {
+
+    if(typeof gamePlayers == 'undefined')
+        setPlayers()
+
+    for (var key in gamePlayers) {
+        document.getElementById('players').innerHTML += '\
+<div class="players color_'+gamePlayers[key].color+'" style="color:'+gamePlayers[key].color+';">\
+    <input type="checkbox" id="player_'+key+'" name="players" class="player" value="'+gamePlayers[key].name+'" checked="checked"\
+    style="background-color:'+gamePlayers[key].color+';" />\
+    <label for="player_'+key+'">' + gamePlayers[key].name + '</label>\
+</div>';
+    }
+
+    bindChanges('.player')
+}
+
+function bindChanges(classes) {
+    const inputs = document.querySelectorAll(classes);
+
+    inputs.forEach(function(item) {
+        item.addEventListener('change', (event) => {
+            updateConsole()
+        });
+    });
+}
+
 
 // ACTIONS
 
@@ -258,10 +338,6 @@ function updateConsole() {
 // });
 
 
-const inputs = document.querySelectorAll(".show");
+bindChanges('.show')
 
-inputs.forEach(function(item) {
-    item.addEventListener('change', (event) => {
-        updateConsole()
-    });
-});
+showPlayers()
