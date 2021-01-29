@@ -349,11 +349,10 @@ function showPlayers() {
     <input type="checkbox" id="player_'+userId+'" name="players" class="player" value="'+key+'" checked="checked"\
     style="background-color:'+gamePlayers[key].color+';" />\
     <label for="player_'+userId+'">\
-    ' + key + ' (\
+    ' + key + ' (points: <span id="points_'+userId+'">0</span>,\
         active: <span id="active_'+userId+'">0</span>,\
         visited: <span id="visited_'+userId+'">0</span>,\
-        first: <span id="first_'+userId+'">0</span>\
-    )\
+        first: <span id="first_'+userId+'">0</span>)\
     </label>\
 </div>';
     }
@@ -385,6 +384,7 @@ function updatePlayers() {
         document.getElementById('active_'+userId).innerHTML = gamePlayers[key].active
         document.getElementById('visited_'+userId).innerHTML = gamePlayers[key].visited
         document.getElementById('first_'+userId).innerHTML = gamePlayers[key].first
+        document.getElementById('points_'+userId).innerHTML = gamePlayers[key].active + gamePlayers[key].visited + gamePlayers[key].first
     }
 }
 
@@ -461,6 +461,14 @@ function drawFlags() {
             }
         }
     }
+}
+
+function showHide(id) {
+    console.log(document.getElementById(id).offsetWidth)
+    if(document.getElementById(id).offsetWidth > 0) 
+        document.getElementById(id).style.width = '0'
+    else
+        document.getElementById(id).style.width = '26%'
 }
 
 

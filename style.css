@@ -1,13 +1,18 @@
 #console {
     display: inline-block;
     vertical-align: top;
-    width: 20%;
+    width: 26%;
+    transition: all 1000ms;
+}
+
+#hideConsole {
+    cursor: pointer;
 }
 
 #map_container {
     display: inline-block;
     text-align: center;
-    width: 79%;
+    width: 73%;
     height: 100%;
 }
 

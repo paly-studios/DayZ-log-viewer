@@ -10,6 +10,8 @@
 
 <body class="container">
     
+    <div id="hideConsole" onClick="showHide('console')"><---</div>
+
     <div id="console">
         <form onSubmit="updateConsole(); return false;">
             <h2>Co pokazać?</h2>
@@ -44,7 +46,7 @@
             
             <br /><br />
             <div id="players"></div>
-            
+
             <label for="custom">Własny filtr textowy (separator: ";"): </label>
             <br />
             <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
