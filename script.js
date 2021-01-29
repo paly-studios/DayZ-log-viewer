@@ -4,6 +4,9 @@ var gameFile = 'games/game1.ADM'
 var gamePlayers
 var gameFlags = {}
 var gameStart
+var logFirst
+var logLast
+var play = null
 
 
 // FUNCTIONS
@@ -143,9 +146,10 @@ function filterOneLog(text) {
     return results
 }
 
-function filterLogs(filters = []) {
+function filterLogs(filters = [], time = false) {
     var logs = getLogs()
     var results = {}
+    let first = true
     
     for (var key in logs) {
         logs[key].forEach(value => {
@@ -155,12 +159,19 @@ function filterLogs(filters = []) {
                 (filters.includes(filteredLog.type) || filters.includes('rest')) 
                 && textFilter(filteredLog.text) 
                 && playerFilter(filteredLog.text)
-                && timeFilter(key)
             ) {
-                if(typeof results[key] == 'undefined')
-                    results[key] = []
+                logLast = timeDecode(key)
+                if(first) {
+                    logFirst = timeDecode(key)
+                    first = false
+                }
 
-                results[key].push(filteredLog)
+                if(timeFilter(key) || time) {
+                    if(typeof results[key] == 'undefined')
+                        results[key] = []
+
+                    results[key].push(filteredLog)
+                }
             }
         })
     }
@@ -218,18 +229,35 @@ function playerFilter(text) {
     return customFilter(text, players, false)
 }
 
+function timeDecode(time) {
+    time = parseInt(time.replace(/:/g, ''))
+
+    if(time < gameStart)
+        time += 1000000
+
+    return time
+}
+
+function timeEncode(time) {
+    if(time) {
+        if(time > 999999)
+            time -= 1000000
+
+        time = '000000' + time.toString()
+        
+        time = time.substr(-6, 2)+':'+time.substr(-4, 2)+':'+time.substr(-2, 2)
+    }
+
+    return time
+}
+
 function timeFilter(time) {
     let test = true
 
     if(document.getElementById('time').value != '') {
 
-        let timeFilters = parseInt(document.getElementById('time').value.replace(/:/g, ''))
-        time = parseInt(time.replace(/:/g, ''))
-        
-        if(timeFilters < gameStart)
-            timeFilters += 1000000
-        if(time < gameStart)
-            time += 1000000
+        let timeFilters = timeDecode(document.getElementById('time').value)
+        time = timeDecode(time)
         
         if(timeFilters != '' && timeFilters < time)
             test = false
@@ -497,6 +525,71 @@ function showHide(id) {
         document.getElementById(id).style.width = '0'
     else
         document.getElementById(id).style.width = '26%'
+}
+
+function timeNext(back = false) {
+    let first = logFirst
+    let last = logLast
+    if(back) {
+        first = logLast
+        last = logFirst
+    }
+
+    let next = timeEncode(last)
+
+    if(document.getElementById('time').value == '')
+        next = timeEncode(first)
+    else {
+        if(timeDecode(document.getElementById('time').value) == last) {
+            timeStop()
+            return false
+        }
+
+        let logs = filterLogs(getFilters(), true)
+        console.log(logs)
+        for(var key in logs) {
+            if(
+                (!back && timeDecode(key) > timeDecode(document.getElementById('time').value))
+                || (back && timeDecode(key) == timeDecode(document.getElementById('time').value))
+            ) {
+                if(!back)
+                    next = key
+                break
+            }
+            next = key
+        }
+    }
+    
+    document.getElementById('time').value = next
+
+    updateConsole()
+}
+
+function timeStop() {
+    clearInterval(play)
+    play = null
+}
+
+function timePlay() {
+    let interval = parseFloat(document.getElementById('speed').value) * 1000
+    if(isNaN(interval) || interval == 0) {
+        interval = 500
+        document.getElementById('speed').value = '0.5'
+    }
+
+    timeNext()
+    play = setInterval(function() {
+        timeNext()
+    }, interval)
+}
+
+function timePlayStop() {
+    if(play !== null) {
+        timeStop()
+    }
+    else {
+        timePlay()
+    }
 }
 
 

@@ -13,7 +13,7 @@
     <div id="hideConsole" onClick="showHide('console')"><---</div>
 
     <div id="console">
-        <form onSubmit="return false;">
+        <form onSubmit="updateConsole(); return false;">
             <h2>Co pokazać?</h2>
             
             <input type="checkbox" id="flags" class="show" name="show[]" value="flags">
@@ -46,7 +46,7 @@
             <br /><br />
             <div id="players"></div>
 
-            <label for="custom">Własny filtr textowy (separator: ";"): </label>
+            <label for="custom">Filtr tekstowy (separator: ";"): </label>
             <br />
             <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
             <label for="customAnd">Or/And</label>
@@ -56,11 +56,14 @@
             <label for="time">Znacznik czasowy: </label>
             <br />
             <input type="text" id="time" class="time" name="time" placeholder="23:32:30">
-            <!-- <br />
-            <input type="text" id="speed" class="time" name="speed" placeholder="Prędkość (np. '1.5')"> -->
+            <br />
+            <input type="text" id="speed" class="speed" name="speed" placeholder="Prędkość (np. '1.5')">
+            <button onClick="timeNext(true);"><--</button>
+            <button onClick="timePlayStop();">Play</button>
+            <button onClick="timeNext();">--></button>
 
             <br />
-            <button onClick="updateConsole();">Filtruj</button>
+            <button>Filtruj</button>
         
         </form>
 
