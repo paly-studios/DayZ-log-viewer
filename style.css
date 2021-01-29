@@ -25,13 +25,14 @@
 
 .tag {
     position: absolute;
+    text-align: center;
 }
 
 .tag > img {
     width: 100%;
 }
 
-.event {
+.tag.event {
     background-repeat: no-repeat;
     background-size: contain;
     width: 40px;
@@ -39,5 +40,16 @@
 }
 
 .tag.visited {
+    width: 10px;
+    height: 10px;
+    margin: 0;
+    padding: 0;
+}
+
+.tag.visited > span {
+    display: inline-block;
+    border-width: 2px;
     padding: 5px;
+    box-shadow: 1px 1px 1px black;
+    border: solid 1px black;
 }

@@ -230,31 +230,30 @@ function clearTags() {
     }
 }
 
-function addTag(position, icon, title) {
+function addTag(position, icon, title, player) {
     var x = calculatePosition('x', position[0])
     var y = calculatePosition('y', position[1])
+    var classes = 'event'
 
-    var tag = '<span class="tag event" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;">';
+    if(typeof player != 'undefined' && player != false) {
+        classes = 'visited'
+        x -= 10 + position[2]
+        y -= 2 + position[3]
+    }
 
-    if(icon.indexOf('<svg ') > -1)
-        tag += icon
-    else
-        tag += '<img src="img/'+ icon +'" />'
+    var tag = '<span class="tag '+classes+'" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;">';
+
+    if(typeof icon != 'undefined' && icon != false) {
+        if(icon.indexOf('<svg ') > -1)
+            tag += icon
+        else
+            tag += '<img src="img/'+ icon +'" />'
+    }
+    else {
+        tag += '<span class="" style="background-color:'+gamePlayers[player].color+';"></span>'
+    }
 
     tag += '</span>'
-
-    document.getElementById('map').innerHTML += tag
-
-}
-
-function addVisited(position, player, title) {
-    var x = calculatePosition('x', position[0]) - 20
-    var y = calculatePosition('y', position[1]) - 40
-
-    for(var i=0; i<player; i++)
-        y += 10
-
-    var tag = '<span class="tag visited" title="'+title+'" style="left: '+x+'px; top: '+y+'px; background-color:'+player.color+';"></span>'
 
     document.getElementById('map').innerHTML += tag
 
@@ -385,7 +384,6 @@ function setFlags() {
 }
 
 function drawFlags() {
-    console.log(gameFlags)
     const flagPin = '\
 <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"\
     width="100%" height="100%" viewBox="0 0 425.963 425.963" style="enable-background:new 0 0 425.963 425.963; %color%"\
@@ -409,8 +407,21 @@ function drawFlags() {
             )
         }
 
-        if(gameFlags[key].length > 0) {
+        if(gameFlags[key].visited.length > 0) {
+            for(var key2 in gameFlags[key].visited) {
+                gameFlags[key].position[2] = 0
+                gameFlags[key].position[3] = key2 * 15 * -1
+                
+                // gameFlags[key].position[2] = key2 * 15 * -1 - 10
+                // gameFlags[key].position[3] = -42
 
+                addTag(
+                    gameFlags[key].position, 
+                    false, 
+                    gameFlags[key].visited[key2],
+                    gameFlags[key].visited[key2]
+                )
+            }
         }
     }
 }
