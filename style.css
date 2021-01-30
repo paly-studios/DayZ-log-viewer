@@ -1,19 +1,23 @@
+#hideConsole {
+    cursor: pointer;
+    float: left;
+}
+
 #console {
-    display: inline-block;
+    position: relative;
+    /* display: inline-block; */
     vertical-align: top;
-    width: 26%;
+    /* width: 26%; */
     transition: all 1000ms;
 }
 
-#hideConsole {
-    cursor: pointer;
-}
-
 #map_container {
-    display: inline-block;
+    /* display: inline-block; */
     text-align: center;
     width: 73%;
     height: 100%;
+    float: right;
+    margin-left: 3px;
 }
 
 #map {
@@ -26,6 +30,7 @@
     background-repeat: no-repeat;
     background-size: contain;
     margin: auto;
+    transition: all 1000ms;
 }
 
 .tag {

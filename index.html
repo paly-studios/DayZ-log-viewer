@@ -10,72 +10,76 @@
 
 <body class="container">
     
-    <div id="hideConsole" onClick="showHide('console')"><---</div>
+    <div id="hideConsole" onClick="showHide('map')"><---</div>
+    <br />
 
-    <div id="console">
-        <form onSubmit="updateConsole(); return false;">
-            <h2>Co pokazać?</h2>
+    <div id="main">
+
+        <div id="map_container">
+            <div id="map"></div>
+        </div>
+
+        <div id="console">
+            <form onSubmit="updateConsole(); return false;">
+                <h2>Co pokazać?</h2>
+                
+                <input type="checkbox" id="flags" class="show" name="show[]" value="flags">
+                <label for="flags">Flagi</label>
+
+                <br />
+                <input type="checkbox" id="deaths" class="show" name="show[]" value="deaths">
+                <label for="deaths">Śmierci</label>
+                
+                <br />
+                <input type="checkbox" id="damages" class="show" name="show[]" value="damages">
+                <label for="damages">Obrażenia gracze</label>
+
+                <br />
+                <input type="checkbox" id="zombies" class="show" name="show[]" value="zombies">
+                <label for="zombies">Obrażenia inne</label>
+                
+                <br />
+                <input type="checkbox" id="constructions" class="show" name="show[]" value="constructions">
+                <label for="constructions">Budowa</label>
+                
+                <br />
+                <input type="checkbox" id="connections" class="show" name="show[]" value="connections">
+                <label for="connections">Połączenia</label>
+                
+                <br />
+                <input type="checkbox" id="rest" class="show" name="show[]" value="rest">
+                <label for="rest">Inne</label>
+                
+                <br /><br />
+                <div id="players"></div>
+
+                <label for="custom">Filtr tekstowy (separator: ";"): </label>
+                <br />
+                <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
+                <label for="customAnd">Or/And</label>
+                <input type="text" id="custom" class="custom" name="custom" placeholder="np. Head; prezent">
             
-            <input type="checkbox" id="flags" class="show" name="show[]" value="flags">
-            <label for="flags">Flagi</label>
+                <br />
+                <label for="time">Znacznik czasowy: </label>
+                <br />
+                <input type="text" id="time" class="time" name="time" placeholder="23:32:30">
+                <br />
+                <input type="text" id="speed" class="speed" name="speed" placeholder="Prędkość (np. '1.5')">
+                <button onClick="timeNext(true);"><--</button>
+                <button onClick="timePlayStop();">Play</button>
+                <button onClick="timeNext();">--></button>
 
-            <br />
-            <input type="checkbox" id="deaths" class="show" name="show[]" value="deaths">
-            <label for="deaths">Śmierci</label>
+                <br />
+                <button>Filtruj</button>
             
-            <br />
-            <input type="checkbox" id="damages" class="show" name="show[]" value="damages">
-            <label for="damages">Obrażenia gracze</label>
+            </form>
 
-            <br />
-            <input type="checkbox" id="zombies" class="show" name="show[]" value="zombies">
-            <label for="zombies">Obrażenia inne</label>
-            
-            <br />
-            <input type="checkbox" id="constructions" class="show" name="show[]" value="constructions">
-            <label for="constructions">Budowa</label>
-            
-            <br />
-            <input type="checkbox" id="connections" class="show" name="show[]" value="connections">
-            <label for="connections">Połączenia</label>
-            
-            <br />
-            <input type="checkbox" id="rest" class="show" name="show[]" value="rest">
-            <label for="rest">Inne</label>
-            
-            <br /><br />
-            <div id="players"></div>
-
-            <label for="custom">Filtr tekstowy (separator: ";"): </label>
-            <br />
-            <input type="checkbox" id="customAnd" class="show" name="customAnd" value="customAnd">
-            <label for="customAnd">Or/And</label>
-            <input type="text" id="custom" class="custom" name="custom" placeholder="np. Head; prezent">
-        
-            <br />
-            <label for="time">Znacznik czasowy: </label>
-            <br />
-            <input type="text" id="time" class="time" name="time" placeholder="23:32:30">
-            <br />
-            <input type="text" id="speed" class="speed" name="speed" placeholder="Prędkość (np. '1.5')">
-            <button onClick="timeNext(true);"><--</button>
-            <button onClick="timePlayStop();">Play</button>
-            <button onClick="timeNext();">--></button>
-
-            <br />
-            <button>Filtruj</button>
-        
-        </form>
-
-        <div id="results"></div>
-    </div>
-
-    <div id="map_container">
-        <div id="map"></div>
+            <div id="results"></div>
+        </div>
     </div>
 
     <footer>
-        <p class="text-center text-muted">© Copyright 2020-2021</p>
+        <p class="text-center text-muted">© Copyright 2021</p>
     </footer>
 
     <script src="script.js"></script>

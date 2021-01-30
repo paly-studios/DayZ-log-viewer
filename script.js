@@ -330,7 +330,7 @@ function updateConsole() {
         }
         
         for (var key2 in logs[key]) {
-            html += "- " + logs[key][key2].text + "<br /><br />"
+            html += "- " + logs[key][key2].text + "<br />"
 
             if(typeof logs[key][key2].position !== 'undefined')
                 addTag(logs[key][key2].position, logs[key][key2].icon, key + ': ' + logs[key][key2].tagTitle)
@@ -494,7 +494,7 @@ function drawFlags() {
             addTag(
                 gameFlags[key].position, 
                 flagPin.replace('%color%', 'fill:'+gamePlayers[gameFlags[key].owner].color+';'), 
-                'Owned: ' + gameFlags[key].owner
+                'Flaga ' + gameFlags[key].owner
             )
         }
 
@@ -520,11 +520,23 @@ function drawFlags() {
 }
 
 function showHide(id) {
-    console.log(document.getElementById(id).offsetWidth)
-    if(document.getElementById(id).offsetWidth > 0) 
-        document.getElementById(id).style.width = '0'
-    else
-        document.getElementById(id).style.width = '26%'
+    if(document.getElementById(id).style.left == '') {
+        document.getElementById(id).style.left = '0px'
+        document.getElementById('console').style.top = '0px'
+        setTimeout(function() {
+            showHide(id)
+        }, 100)
+        return false
+    }
+        
+    if(document.getElementById(id).style.left != '0px') {
+        document.getElementById(id).style.left = '0px'
+        document.getElementById('console').style.top = '0px'
+    }
+    else {
+        document.getElementById(id).style.left = '-370px'
+        document.getElementById('console').style.top = '865px'
+    }
 }
 
 function timeNext(back = false) {
@@ -546,7 +558,6 @@ function timeNext(back = false) {
         }
 
         let logs = filterLogs(getFilters(), true)
-        console.log(logs)
         for(var key in logs) {
             if(
                 (!back && timeDecode(key) > timeDecode(document.getElementById('time').value))
