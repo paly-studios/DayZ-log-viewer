@@ -476,11 +476,15 @@ function updatePlayers() {
         if(gameFlags[key].owner != '')
             gamePlayers[gameFlags[key].owner.match(/(.*) /)[1]].active += 1
 
+        let visited = []
         for(var key2 in gameFlags[key].visited) {
             if(key2 == 0)
                 gamePlayers[gameFlags[key].visited[key2].match(/(.*) /)[1]].first += 1
 
-            gamePlayers[gameFlags[key].visited[key2].match(/(.*) /)[1]].visited += 1
+            if(!visited.includes(gameFlags[key].visited[key2].match(/(.*) /)[1])) {
+                visited.push(gameFlags[key].visited[key2].match(/(.*) /)[1])
+                gamePlayers[gameFlags[key].visited[key2].match(/(.*) /)[1]].visited += 1
+            }
         }
     }
 
