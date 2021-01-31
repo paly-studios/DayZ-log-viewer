@@ -176,7 +176,7 @@ function filterOneLog(text) {
 
                 results = {
                     "type": key,
-                    "text": text.replace(actions[key].regDelete, '').replace('(DEAD)', ''),
+                    "text": text.replace(actions[key].regDelete, ''),
                     "tagTitle": tagTitle, 
                     "icon": actions[key].icon
                 }
@@ -393,9 +393,10 @@ function updateConsole() {
                     gameFlags[flag].owner = ''
                 }
                 else {
-                    gameFlags[flag].owner = user
+                    gameFlags[flag].owner = user + ' ' + key
                     if(!gameFlags[flag].visited.includes(user)) {
-                        gameFlags[flag].visited.push(user)
+                    // if(!gameFlags[flag].visited.some(i => i.indexOf(user) > -1)) {
+                        gameFlags[flag].visited.push(user + ' ' + key)
                     }
                 }
             }
@@ -421,7 +422,7 @@ function setPlayers() {
         "NieWaskiDzik":"fuchsia",
         "Superkomunista":"lime"
     }
-    let colors = ['gray', 'black']
+    // let colors = ['gray', 'black']
 
     if(typeof logFile == 'undefined')
         logFile = loadLogs(gameFile)
@@ -473,13 +474,13 @@ function updatePlayers() {
 
     for (var key in gameFlags) {
         if(gameFlags[key].owner != '')
-            gamePlayers[gameFlags[key].owner].active += 1
+            gamePlayers[gameFlags[key].owner.match(/(.*) /)[1]].active += 1
 
         for(var key2 in gameFlags[key].visited) {
             if(key2 == 0)
-                gamePlayers[gameFlags[key].visited[key2]].first += 1
+                gamePlayers[gameFlags[key].visited[key2].match(/(.*) /)[1]].first += 1
 
-            gamePlayers[gameFlags[key].visited[key2]].visited += 1
+            gamePlayers[gameFlags[key].visited[key2].match(/(.*) /)[1]].visited += 1
         }
     }
 
@@ -543,7 +544,7 @@ function drawFlags() {
         if(gameFlags[key].owner != '') {
             addTag(
                 gameFlags[key].position, 
-                flagPin.replace('%color%', 'fill:'+gamePlayers[gameFlags[key].owner].color+';'), 
+                flagPin.replace('%color%', 'fill:'+gamePlayers[gameFlags[key].owner.match(/(.*) /)[1]].color+';'), 
                 'Flaga ' + gameFlags[key].owner
             )
         }
@@ -562,7 +563,7 @@ function drawFlags() {
                     gameFlags[key].position, 
                     false, 
                     gameFlags[key].visited[key2],
-                    gameFlags[key].visited[key2]
+                    gameFlags[key].visited[key2].match(/(.*) /)[1]
                 )
             }
         }
