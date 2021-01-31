@@ -31,6 +31,7 @@
     background-size: contain;
     margin: auto;
     transition: all 1000ms;
+    z-index: 9;
 }
 
 .tag {

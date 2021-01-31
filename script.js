@@ -105,7 +105,7 @@ function filterOneLog(text) {
             "icon": "connected.png"
         },
         "rest": {
-            "filter": [""],
+            "filter": [" "],
             "regDelete": regDelete,
             "regUser": regUser,
             "icon": "other.png"
@@ -119,8 +119,57 @@ function filterOneLog(text) {
                 let tagTitle = ""
                 if(text.match(actions[key].regUser) !== null) {
                     tagTitle = text.match(actions[key].regUser)[0]
-                    if(typeof text.match(actions[key].regUser)[1] !== 'undefined')
-                        tagTitle = text.match(actions[key].regUser)[1] + '-->' + text.match(actions[key].regUser)[0]
+
+                    if(text.indexOf('died') > -1) {
+                        tagTitle += ' po prostu umarł...'
+                    }
+                    else if(text.indexOf('killed by Player') > -1) {
+                        let bron = text.match(/with (.*) from/)[1]
+                        let meters = parseInt(text.match(/from (.*) meters/)[1])
+                        
+                        tagTitle += ' zabity przez ' + text.match(actions[key].regUser)[1] + ' ('+ bron +' '+ meters +'m)'
+                    }
+                    else if(text.indexOf('killed by Zmb') > -1) {
+                        tagTitle += ' zabity przez ' + text.match(/by (.*)/)[1]
+                    }
+                    else if(text.indexOf('hit by') > -1) {
+                        let bron
+                        
+                        if(text.indexOf('from ') > -1)
+                            bron = text.match(/with (.*) from/)[1]
+                        else if(text.indexOf('from ') > -1){
+                            bron = text.match(/with (.*)/)[1]
+                        }
+                        else
+                            bron = 'gołe pięści'
+
+                        let damage = text.match(/for (.*) damage/)
+                        if(damage != null)
+                            damage = damage[1]
+
+                        let attacker
+                        if(text.indexOf('Zarażony') > -1)
+                            attacker = 'Zarażony'
+                        else if(text.indexOf('FallDamage') > -1)
+                            attacker = 'upadku'
+                        else
+                            attacker = text.match(actions[key].regUser)[1]
+
+                        tagTitle += ' oberwał od ' + attacker
+                        if(damage != null)
+                            tagTitle += ' ('+ bron +' '+ damage +'dmg)'
+                    }
+                    else if(text.indexOf('unconscious') > -1) {
+                        tagTitle += ' zemdlał'
+                    }
+                    else if(text.indexOf('consciousness') > -1) {
+                        tagTitle += ' odzyskał przytomność'
+                    }
+                    else if(text.indexOf('placed') > -1) {
+                        tagTitle += ' zbudował ' + text.match(/placed (.*)/)[1]
+                    }
+                    else if(typeof text.match(actions[key].regUser)[1] !== 'undefined')
+                        tagTitle = text.match(actions[key].regUser)[1] + ' --> ' + text.match(actions[key].regUser)[0]
 
                     tagTitle = tagTitle.replace(/"/g, "")
                 }
@@ -156,7 +205,8 @@ function filterLogs(filters = [], time = false) {
             let filteredLog = filterOneLog(value)
             
             if(
-                (filters.includes(filteredLog.type) || filters.includes('rest')) 
+                (filters.includes(filteredLog.type)) 
+                // (filters.includes(filteredLog.type) || filters.includes('rest')) 
                 && textFilter(filteredLog.text) 
                 && playerFilter(filteredLog.text)
             ) {
@@ -333,7 +383,7 @@ function updateConsole() {
             html += "- " + logs[key][key2].text + "<br />"
 
             if(typeof logs[key][key2].position !== 'undefined')
-                addTag(logs[key][key2].position, logs[key][key2].icon, key + ': ' + logs[key][key2].tagTitle)
+                addTag(logs[key][key2].position, logs[key][key2].icon, key + ' ' + logs[key][key2].tagTitle)
 
             if(logs[key][key2].type == 'flags') {
                 let user = logs[key][key2].text.substr(logs[key][key2].text.indexOf('by ') + 3)
