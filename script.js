@@ -566,13 +566,15 @@ function drawFlags() {
 
         if(gameFlags[key].visited.length > 0) {
             for(var key2 in gameFlags[key].visited) {
-                // Vertical
-                gameFlags[key].position[2] = 0
-                gameFlags[key].position[3] = key2 * 15 * -1
                 
-                // Horizontal
-                // gameFlags[key].position[2] = key2 * 15 * -1 - 10
-                // gameFlags[key].position[3] = -42
+                if(!document.getElementById('flags_horizontal').checked) {
+                    gameFlags[key].position[2] = 5
+                    gameFlags[key].position[3] = key2 * 15 * -1
+                }
+                else {
+                    gameFlags[key].position[2] = key2 * 15 * -1 - 5
+                    gameFlags[key].position[3] = -42
+                }
 
                 addTag(
                     gameFlags[key].position, 
