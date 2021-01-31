@@ -394,8 +394,8 @@ function updateConsole() {
                 }
                 else {
                     gameFlags[flag].owner = user + ' ' + key
-                    if(!gameFlags[flag].visited.includes(user)) {
-                    // if(!gameFlags[flag].visited.some(i => i.indexOf(user) > -1)) {
+                    // if(!gameFlags[flag].visited.includes(user)) {
+                    if(!gameFlags[flag].visited.some(i => i.indexOf(user) > -1) || !document.getElementById('flags_visited').checked) {
                         gameFlags[flag].visited.push(user + ' ' + key)
                     }
                 }
