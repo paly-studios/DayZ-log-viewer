@@ -46,8 +46,8 @@
 .tag.event {
     background-repeat: no-repeat;
     background-size: contain;
-    width: 40px;
-    height: 40px;
+    max-width: 40px;
+    max-height: 40px;
 }
 
 .tag.visited {
@@ -63,4 +63,8 @@
     padding: 5px;
     box-shadow: 1px 1px 1px black;
     border: solid 1px black;
+}
+
+.fas {
+    font-size: 40px;
 }

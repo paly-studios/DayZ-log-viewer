@@ -72,43 +72,43 @@ function filterOneLog(text) {
             "filter": ["conquered", "longer controller"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "flag.png"
+            "icon": "fa-map-marker-alt"
         },
         "deaths": {
             "filter": ["killed", "died"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "death.png"
+            "icon": "fa-skull-crossbones"
         },
         "damages": {
             "filter": ["hit by Player"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "hit.png"
+            "icon": "fa-crosshairs"
         },
         "zombies": {
             "filter": ["hit by", "consciousness", "unconscious"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "damage.png"
+            "icon": "fa-exclamation"
         },
         "constructions": {
             "filter": ["placed"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "construction.png"
+            "icon": "fa-campground"
         },
         "connections": {
             "filter": ["connected"],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "connected.png"
+            "icon": "fa-link"
         },
         "rest": {
             "filter": [" "],
             "regDelete": regDelete,
             "regUser": regUser,
-            "icon": "other.png"
+            "icon": "fa-question"
         }
     }
     
@@ -117,8 +117,10 @@ function filterOneLog(text) {
             if(actions[key].filter[filter] !== '' && text.indexOf(actions[key].filter[filter]) > -1) {
 
                 let tagTitle = ""
-                if(text.match(actions[key].regUser) !== null) {
-                    tagTitle = text.match(actions[key].regUser)[0]
+                let tagUser = text.match(actions[key].regUser)
+                if(tagUser != null) {
+                    tagUser = text.match(actions[key].regUser)[0].replace(/"/g, "")
+                    tagTitle = tagUser
 
                     if(text.indexOf('died') > -1) {
                         tagTitle += ' po prostu umarł...'
@@ -178,9 +180,10 @@ function filterOneLog(text) {
                     "type": key,
                     "text": text.replace(actions[key].regDelete, ''),
                     "tagTitle": tagTitle, 
-                    "icon": actions[key].icon
+                    "icon": actions[key].icon,
+                    "player": tagUser
                 }
-
+                
                 if(text.indexOf('pos=<') > -1)
                     results['position'] = text.match(regPosition)[1].split(',', 2)
                 
@@ -334,27 +337,34 @@ function clearTags() {
     }
 }
 
-function addTag(position, icon, title, player) {
+function addTag(position, icon, title, player, visit = false) {
     var x = calculatePosition('x', position[0])
     var y = calculatePosition('y', position[1])
     var classes = 'event'
-
-    if(typeof player != 'undefined' && player != false) {
-        classes = 'visited'
-        x -= 10 + position[2]
-        y -= 2 + position[3]
+    var color = 'black'
+    
+    if(typeof player != 'undefined' && typeof gamePlayers[player] != 'undefined') {
+        color = gamePlayers[player].color
+        
+        if(visit) {
+            classes = 'visited'
+            x -= 10 + position[2]
+            y -= 2 + position[3]
+        }
     }
 
     var tag = '<span class="tag '+classes+'" title="'+ title +'" style="left: '+ x +'px; top: '+ y +'px;">';
 
     if(typeof icon != 'undefined' && icon != false) {
-        if(icon.indexOf('<svg ') > -1)
+        if(icon.indexOf('fa-') > -1)
+            tag += '<i class="fas '+ icon +'" style="color: '+color+';"></i>'
+        else if(icon.indexOf('<svg ') > -1)
             tag += icon
-        else
+        else 
             tag += '<img src="img/'+ icon +'" />'
     }
     else {
-        tag += '<span class="" style="background-color:'+gamePlayers[player].color+';"></span>'
+        tag += '<span class="" style="background-color:'+color+';"></span>'
     }
 
     tag += '</span>'
@@ -381,9 +391,9 @@ function updateConsole() {
         
         for (var key2 in logs[key]) {
             html += "- " + logs[key][key2].text + "<br />"
-
+            
             if(typeof logs[key][key2].position !== 'undefined')
-                addTag(logs[key][key2].position, logs[key][key2].icon, key + ' ' + logs[key][key2].tagTitle)
+                addTag(logs[key][key2].position, logs[key][key2].icon, key + ' ' + logs[key][key2].tagTitle, logs[key][key2].player)
 
             if(logs[key][key2].type == 'flags') {
                 let user = logs[key][key2].text.substr(logs[key][key2].text.indexOf('by ') + 3)
@@ -394,7 +404,6 @@ function updateConsole() {
                 }
                 else {
                     gameFlags[flag].owner = user + ' ' + key
-                    // if(!gameFlags[flag].visited.includes(user)) {
                     if(!gameFlags[flag].visited.some(i => i.indexOf(user) > -1) || !document.getElementById('flags_visited').checked) {
                         gameFlags[flag].visited.push(user + ' ' + key)
                     }
@@ -530,7 +539,8 @@ function setFlags() {
 }
 
 function drawFlags() {
-    const flagPin = '\
+    const flagPin = 'fa-map-marker-alt'
+    const flagPin2 = '\
 <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"\
     width="100%" height="100%" viewBox="0 0 425.963 425.963" style="enable-background:new 0 0 425.963 425.963; %color%"\
     xml:space="preserve">\
@@ -549,7 +559,8 @@ function drawFlags() {
             addTag(
                 gameFlags[key].position, 
                 flagPin.replace('%color%', 'fill:'+gamePlayers[gameFlags[key].owner.match(/(.*) /)[1]].color+';'), 
-                'Flaga ' + gameFlags[key].owner
+                'Flaga ' + gameFlags[key].owner,
+                gameFlags[key].owner.match(/(.*) /)[1]
             )
         }
 
@@ -567,7 +578,8 @@ function drawFlags() {
                     gameFlags[key].position, 
                     false, 
                     gameFlags[key].visited[key2],
-                    gameFlags[key].visited[key2].match(/(.*) /)[1]
+                    gameFlags[key].visited[key2].match(/(.*) /)[1],
+                    true
                 )
             }
         }
